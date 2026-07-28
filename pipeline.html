@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pipeline - SalesTrack</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar border-bottom px-4">
+    <span class="navbar-brand fw-bold">SalesTrack</span>
+    <div class="d-flex gap-3 kanban-row">
+      <a href="dashboard.html" class="text-decoration-none" style="color:var(--text)">Dashboard</a>
+      <a href="pipeline.html" class="text-decoration-none fw-bold" style="color:var(--accent)">Pipeline</a>
+      <a href="contacts.html" class="text-decoration-none" style="color:var(--text)">Contacts</a>
+      <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Log out</button>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-4 px-4">
+    <h1 class="h3 mb-4">Lead Pipeline</h1>
+
+    <div class="d-flex gap-3" style="overflow-x:auto;">
+      <div class="kanban-column" data-stage="New Lead">
+        <h6 class="kanban-header">New Lead</h6>
+        <div class="kanban-cards" id="col-New Lead"></div>
+      </div>
+      <div class="kanban-column" data-stage="Contacted">
+        <h6 class="kanban-header">Contacted</h6>
+        <div class="kanban-cards" id="col-Contacted"></div>
+      </div>
+      <div class="kanban-column" data-stage="Qualified">
+        <h6 class="kanban-header">Qualified</h6>
+        <div class="kanban-cards" id="col-Qualified"></div>
+      </div>
+      <div class="kanban-column" data-stage="Proposal Sent">
+        <h6 class="kanban-header">Proposal Sent</h6>
+        <div class="kanban-cards" id="col-Proposal Sent"></div>
+      </div>
+      <div class="kanban-column" data-stage="Negotiation">
+        <h6 class="kanban-header">Negotiation</h6>
+        <div class="kanban-cards" id="col-Negotiation"></div>
+      </div>
+      <div class="kanban-column" data-stage="Closed Won">
+        <h6 class="kanban-header">Closed Won</h6>
+        <div class="kanban-cards" id="col-Closed Won"></div>
+      </div>
+      <div class="kanban-column" data-stage="Closed Lost">
+        <h6 class="kanban-header">Closed Lost</h6>
+        <div class="kanban-cards" id="col-Closed Lost"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/pipeline.js"></script>
+</body>
+</html>
