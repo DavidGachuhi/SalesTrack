@@ -1,16 +1,6 @@
 @charset "UTF-8"; /* Sets character encoding (must be on line 1) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap'); /* External fonts or files */
 
-:root {
-  --bg: #ffffff;
-  --surface: #f7f7f7;      /* card backgrounds, subtle contrast from bg */
-  --text: #171717;         /* near-black, not pure #000 — softer on the eyes */
-  --text-muted: #6b6b6b;   /* secondary text, labels */
-  --border: #e5e5e5;       /* hairline dividers, card borders */
-  --accent: #15803d;       /* green — buttons, active states, chart highlights */
-  --accent-hover: #166534; /* darker green for hover */
-}
-
 body {
   font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -41,6 +31,16 @@ body {
   border-color: var(--border);
 }
 .form-control:focus {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+.form-select {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.form-select:focus {
   background-color: var(--surface);
   color: var(--text);
 }
@@ -80,17 +80,43 @@ body {
   padding: 10px 12px;
   color: var(--text);
   font-size: 0.9rem;
-}
-.kanban-row {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 12px;
-}
-.kanban-column {
-  min-width: 0; 
+  cursor: pointer;
 }
 .lead-card.overdue {
   border-left-color: #dc2626;
+}
+
+.navlink {
+  color: var(--text);
+  text-decoration: none;
+}
+.navlink-active {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: bold;
+}
+.text-accent {
+  color: var(--accent);
+}
+.btn-accent {
+  background-color: var(--accent);
+  color: #fff;
+}
+.btn-accent:hover {
+  background-color: var(--accent-hover);
+  color: #fff;
+}
+.badge-accent {
+  background-color: var(--accent);
+}
+.modal-content-dark {
+  background-color: var(--surface);
+  color: var(--text);
+}
+.table-dark {
+  --bs-table-bg: var(--surface);
+  --bs-table-color: var(--text);
+  --bs-table-border-color: var(--border);
 }
 
 .form-control::placeholder {

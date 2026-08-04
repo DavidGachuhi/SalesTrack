@@ -6,10 +6,17 @@ if (userRole !== "admin") {
 }
 
 async function loadUsers() {
-  const { data, error } = await supabaseClient.from("users").select("*").order("full_name");
-  if (error) { console.log(error); return; }
-
   const tbody = document.getElementById("usersTableBody");
+  tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center py-3">Loading users...</td></tr>`;
+
+  const { data, error } = await supabaseClient.from("users").select("*").order("full_name");
+  if (error) { console.log(error); tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center py-3">Failed to load users.</td></tr>`; return; }
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center py-3">No users yet.</td></tr>`;
+    return;
+  }
+
   tbody.innerHTML = "";
 
   data.forEach(u => {
@@ -35,15 +42,22 @@ async function loadUsers() {
 }
 
 async function loadAuditLog() {
+  const list = document.getElementById("auditLogList");
+  list.innerHTML = `<div class="text-muted small">Loading activity...</div>`;
+
   const { data, error } = await supabaseClient
     .from("audit_logs")
     .select("*, users!audit_logs_actor_id_fkey(full_name)")
     .order("created_at", { ascending: false })
     .limit(15);
 
-  if (error) { console.log(error); return; }
+  if (error) { console.log(error); list.innerHTML = `<div class="text-muted small">Failed to load activity.</div>`; return; }
 
-  const list = document.getElementById("auditLogList");
+  if (data.length === 0) {
+    list.innerHTML = `<div class="text-muted small">No activity yet.</div>`;
+    return;
+  }
+
   list.innerHTML = "";
   data.forEach(log => {
     list.innerHTML += `

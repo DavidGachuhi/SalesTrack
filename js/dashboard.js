@@ -9,17 +9,21 @@ if (!userRole) {
 if (userRole === "admin") {
   document.querySelector("nav .d-flex").insertAdjacentHTML(
     "beforeend",
-    '<a href="admin.html" class="text-decoration-none" style="color:var(--text)">Admin</a>'
+    '<a href="admin.html" class="navlink">Admin</a>'
   );
 }
 
 // Add to dashboard.js, after the admin-nav-check block
 async function loadDashboardStats() {
   const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
   const isManagerOrAdmin = userRole === "manager" || userRole === "admin";
 
-  const { data: leads } = await supabaseClient.from("leads").select("*");
-  const { data: activities } = await supabaseClient.from("activities").select("*");
+  const { data: leads, error: leadsError } = await supabaseClient.from("leads").select("*");
+  if (leadsError) { console.log(leadsError); return; }
+
+  const { data: activities, error: activitiesError } = await supabaseClient.from("activities").select("*");
+  if (activitiesError) { console.log(activitiesError); return; }
 
   const myLeads = isManagerOrAdmin ? leads : leads.filter(l => l.owner_id === user.id);
   const overdueLeads = myLeads.filter(l => {
@@ -39,7 +43,7 @@ async function loadDashboardStats() {
   document.getElementById("statCards").innerHTML = cards.map(c => `
     <div class="col-md-3">
       <div class="card p-3 text-center">
-        <div class="h2 fw-bold" style="color:var(--accent)">${c.value}</div>
+        <div class="h2 fw-bold text-accent">${c.value}</div>
         <div class="text-muted small">${c.label}</div>
       </div>
     </div>

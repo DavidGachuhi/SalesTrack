@@ -30,8 +30,6 @@ CREATE TABLE public.leads (
   closed_reason text,
   last_contacted_at timestamp without time zone,
   created_at timestamp without time zone DEFAULT now(),
-  lead_score integer DEFAULT 0,
-  is_overdue boolean DEFAULT false,
   CONSTRAINT leads_pkey PRIMARY KEY (id),
   CONSTRAINT leads_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES public.contacts(id),
   CONSTRAINT leads_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id)

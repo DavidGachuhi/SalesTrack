@@ -4,7 +4,7 @@ if (!userRole) window.location.href = "index.html";
 if (userRole === "admin") {
   document.querySelector("nav .d-flex").insertAdjacentHTML(
     "beforeend",
-    '<a href="admin.html" class="text-decoration-none" style="color:var(--text)">Admin</a>'
+    '<a href="admin.html" class="navlink">Admin</a>'
   );
 }
 

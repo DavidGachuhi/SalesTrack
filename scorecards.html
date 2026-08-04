@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scorecards - SalesTrack</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
@@ -10,11 +11,11 @@
   <nav class="navbar border-bottom px-4">
     <span class="navbar-brand fw-bold">SalesTrack</span>
     <div class="d-flex align-items-center gap-3">
-      <a href="dashboard.html" class="text-decoration-none" style="color:var(--text)">Dashboard</a>
-      <a href="pipeline.html" class="text-decoration-none" style="color:var(--text)">Pipeline</a>
-      <a href="contacts.html" class="text-decoration-none" style="color:var(--text)">Contacts</a>
-      <a href="scorecards.html" class="text-decoration-none fw-bold" style="color:var(--accent)">Scorecards</a>
-      <a href="reports.html" class="text-decoration-none" style="color:var(--text)">Reports</a>
+      <a href="dashboard.html" class="navlink">Dashboard</a>
+      <a href="pipeline.html" class="navlink">Pipeline</a>
+      <a href="contacts.html" class="navlink">Contacts</a>
+      <a href="scorecards.html" class="navlink-active">Scorecards</a>
+      <a href="reports.html" class="navlink">Reports</a>
       <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Log out</button>
     </div>
   </nav>
@@ -31,24 +32,26 @@
           <label class="form-label">Self score (1-10)</label>
           <input type="number" min="1" max="10" class="form-control mb-2" id="agentScore" required>
           <textarea class="form-control mb-2" id="agentComments" placeholder="Comments" rows="3"></textarea>
-          <button type="submit" class="btn" style="background-color:var(--accent); color:white;">Submit</button>
+          <button type="submit" class="btn btn-accent">Submit</button>
         </form>
       </div>
     </div>
 
     <h5>My scorecards</h5>
-    <table class="table table-dark table-hover">
-      <thead>
-        <tr><th>Period</th><th>Agent</th><th>Self score</th><th>Manager score</th><th>Manager comments</th><th></th></tr>
-      </thead>
-      <tbody id="scorecardsTableBody"></tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="table table-dark table-hover">
+        <thead>
+          <tr><th>Period</th><th>Agent</th><th>Self score</th><th>Manager score</th><th>Manager comments</th><th></th></tr>
+        </thead>
+        <tbody id="scorecardsTableBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Manager scoring modal -->
   <div class="modal fade" id="managerScoreModal" tabindex="-1">
     <div class="modal-dialog">
-      <div class="modal-content" style="background-color:var(--surface); color:var(--text);">
+      <div class="modal-content modal-content-dark">
         <div class="modal-header">
           <h5 class="modal-title">Manager scoring</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -61,7 +64,7 @@
             <textarea class="form-control mb-2" id="managerComments" placeholder="Coaching notes" rows="3"></textarea>
           </div>
           <div class="modal-footer">
-            <button type="submit" class="btn" style="background-color:var(--accent); color:white;">Save</button>
+            <button type="submit" class="btn btn-accent">Save</button>
           </div>
         </form>
       </div>

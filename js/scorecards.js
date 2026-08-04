@@ -4,7 +4,7 @@ if (!userRole) window.location.href = "index.html";
 if (userRole === "admin") {
   document.querySelector("nav .d-flex").insertAdjacentHTML(
     "beforeend",
-    '<a href="admin.html" class="text-decoration-none" style="color:var(--text)">Admin</a>'
+    '<a href="admin.html" class="navlink">Admin</a>'
   );
 }
 
@@ -14,14 +14,29 @@ if (userRole === "agent") {
 }
 
 async function loadScorecards() {
-  const { data, error } = await supabaseClient
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) { window.location.href = "index.html"; return; }
+
+  let query = supabaseClient
     .from("scorecards")
     .select("*, users!scorecards_agent_id_fkey(full_name)")
     .order("created_at", { ascending: false });
 
-  if (error) { console.log(error); return; }
+  if (userRole === "agent") {
+    query = query.eq("agent_id", user.id);
+  }
 
   const tbody = document.getElementById("scorecardsTableBody");
+  tbody.innerHTML = `<tr><td colspan="6" class="text-muted text-center py-3">Loading scorecards...</td></tr>`;
+
+  const { data, error } = await query;
+  if (error) { console.log(error); tbody.innerHTML = `<tr><td colspan="6" class="text-muted text-center py-3">Failed to load scorecards.</td></tr>`; return; }
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-muted text-center py-3">No scorecards yet.</td></tr>`;
+    return;
+  }
+
   tbody.innerHTML = "";
 
   data.forEach(sc => {
@@ -45,6 +60,7 @@ if (selfForm) {
   selfForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) { alert("Session expired. Please log in again."); window.location.href = "index.html"; return; }
 
     const { error } = await supabaseClient.from("scorecards").insert({
       agent_id: user.id,
@@ -71,6 +87,7 @@ document.addEventListener("click", (e) => {
 document.getElementById("managerScoreForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) { alert("Session expired. Please log in again."); window.location.href = "index.html"; return; }
 
   const { error } = await supabaseClient
     .from("scorecards")
