@@ -10,16 +10,21 @@
 <body>
   <nav class="navbar border-bottom px-4">
     <span class="navbar-brand fw-bold">SalesTrack</span>
-    <div class="d-flex gap-3 kanban-row">
+    <div class="d-flex gap-3">
       <a href="dashboard.html" class="text-decoration-none" style="color:var(--text)">Dashboard</a>
       <a href="pipeline.html" class="text-decoration-none fw-bold" style="color:var(--accent)">Pipeline</a>
       <a href="contacts.html" class="text-decoration-none" style="color:var(--text)">Contacts</a>
+      <a href="scorecards.html" class="text-decoration-none" style="color:var(--text)">Scorecards</a>
+      <a href="reports.html" class="text-decoration-none fw-bold" style="color:var(--accent)">Reports</a>
       <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Log out</button>
     </div>
   </nav>
 
-  <div class="container-fluid mt-4 px-4">
-    <h1 class="h3 mb-4">Lead Pipeline</h1>
+  <div class="container-fluid mt-4 px-4 d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-4">Lead Pipeline</h1>
+  <button class="btn" style="background-color:var(--accent); color:white;" data-bs-toggle="modal" data-bs-target="#addLeadModal">Add lead</button>
+  </div>
+
 
     <div class="d-flex gap-3" style="overflow-x:auto;">
       <div class="kanban-column" data-stage="New Lead">
@@ -51,9 +56,60 @@
         <div class="kanban-cards" id="col-Closed Lost"></div>
       </div>
     </div>
+  
+
+  <div class="modal fade" id="addLeadModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color:var(--surface); color:var(--text);">
+      <div class="modal-header">
+        <h5 class="modal-title">Add lead</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="addLeadForm">
+        <div class="modal-body">
+          <input type="text" class="form-control mb-2" id="leadTitle" placeholder="Lead title (e.g. Jane Doe - Life Insurance)" required>
+          <select class="form-select mb-2" id="leadContact">
+            <option value="">Link to contact (optional)...</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn" style="background-color:var(--accent); color:white;">Create lead</button>
+        </div>
+      </form>
+    </div>
   </div>
+</div>
+
+  <div class="modal fade" id="logActivityModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content" style="background-color:var(--surface); color:var(--text);">
+      <div class="modal-header">
+        <h5 class="modal-title" id="activityModalLeadTitle">Log activity</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="logActivityForm">
+        <div class="modal-body">
+          <input type="hidden" id="activityLeadId">
+          <select class="form-select mb-2" id="activityType" required>
+            <option value="">Select type...</option>
+            <option value="Call">Call</option>
+            <option value="Email">Email</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Note">Note</option>
+          </select>
+          <textarea class="form-control" id="activityNotes" placeholder="Notes" rows="3"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn" style="background-color:var(--accent); color:white;">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/pipeline.js"></script>
 </body>
