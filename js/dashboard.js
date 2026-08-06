@@ -19,7 +19,7 @@ async function loadDashboardStats() {
   if (!user) return;
   const isManagerOrAdmin = userRole === "manager" || userRole === "admin";
 
-  const { data: leads, error: leadsError } = await supabaseClient.from("leads").select("*");
+  const { data: leads, error: leadsError } = await supabaseClient.from("leads").select("*").eq("is_deleted", false);
   if (leadsError) { console.log(leadsError); return; }
 
   const { data: activities, error: activitiesError } = await supabaseClient.from("activities").select("*");
@@ -51,6 +51,60 @@ async function loadDashboardStats() {
 }
 
 loadDashboardStats();
+
+const linkCardsByRole = {
+  agent: [
+    { label: "View my pipeline", href: "pipeline.html" },
+    { label: "View my scorecard", href: "scorecards.html" }
+  ],
+  manager: [
+    { label: "Team pipeline", href: "pipeline.html" },
+    { label: "Scorecards to review", href: "scorecards.html" },
+    { label: "Reports", href: "reports.html" }
+  ],
+  admin: [
+    { label: "User management", href: "admin.html" },
+    { label: "Audit log", href: "admin.html" },
+    { label: "Generate report", href: "admin.html" }
+  ]
+};
+
+async function loadRoleCards() {
+  const container = document.getElementById("roleCards");
+  let statCards = [];
+
+  if (userRole === "admin") {
+    const { count: userCount } = await supabaseClient.from("users").select("*", { count: "exact", head: true });
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { count: recentAuditCount } = await supabaseClient
+      .from("audit_logs").select("*", { count: "exact", head: true }).gte("created_at", weekAgo);
+    statCards = [
+      { label: "Total users", value: userCount ?? 0 },
+      { label: "Recent audit events (7d)", value: recentAuditCount ?? 0 }
+    ];
+  }
+
+  const statHtml = statCards.map(c => `
+    <div class="col-md-3">
+      <div class="card p-3 text-center">
+        <div class="h2 fw-bold text-accent">${c.value}</div>
+        <div class="text-muted small">${c.label}</div>
+      </div>
+    </div>
+  `).join("");
+
+  const linkHtml = (linkCardsByRole[userRole] || []).map(c => `
+    <div class="col-md-3">
+      <a href="${c.href}" class="card p-3 text-center text-decoration-none">
+        <div class="fw-bold text-accent">${c.label}</div>
+      </a>
+    </div>
+  `).join("");
+
+  container.innerHTML = statHtml + linkHtml;
+}
+
+loadRoleCards();
 
 // Step 2: show a welcome message
 document.getElementById("welcomeMsg").textContent = `${userName} (${userRole})`;

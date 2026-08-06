@@ -93,10 +93,6 @@
           <input type="hidden" id="activityLeadId">
           <select class="form-select mb-2" id="activityType" required>
             <option value="">Select type...</option>
-            <option value="Call">Call</option>
-            <option value="Email">Email</option>
-            <option value="Meeting">Meeting</option>
-            <option value="Note">Note</option>
           </select>
           <textarea class="form-control" id="activityNotes" placeholder="Notes" rows="3"></textarea>
         </div>
@@ -134,11 +130,19 @@
             <div class="text-muted small">Closed reason</div>
             <div id="leadDetailReason"></div>
           </div>
+          <div class="mb-3 d-none" id="leadDetailReassignWrap">
+            <div class="text-muted small">Owner</div>
+            <div class="d-flex gap-2 align-items-center">
+              <select class="form-select form-select-sm" id="leadDetailOwnerSelect" style="max-width:220px;"></select>
+              <button type="button" class="btn btn-sm btn-outline-light" id="leadDetailReassignBtn">Save</button>
+            </div>
+          </div>
           <hr>
           <h6>Activity history</h6>
           <div id="leadDetailActivities" class="d-flex flex-column gap-2"></div>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-outline-danger d-none" id="leadDetailDeleteBtn">Delete lead</button>
           <button type="button" class="btn btn-outline-light log-activity-btn" id="leadDetailLogActivityBtn" data-bs-dismiss="modal">Log activity</button>
         </div>
       </div>

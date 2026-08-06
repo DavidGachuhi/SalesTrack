@@ -8,23 +8,42 @@ if (userRole === "admin") {
   );
 }
 
+let currentUserId = null;
+
 async function loadContacts() {
   const tbody = document.getElementById("contactsTableBody");
-  tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center py-3">Loading contacts...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="5" class="text-muted text-center py-3">Loading contacts...</td></tr>`;
 
-  const { data, error } = await supabaseClient.from("contacts").select("*").order("created_at", { ascending: false });
-  if (error) { console.log(error); tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center py-3">Failed to load contacts.</td></tr>`; return; }
+  const { data, error } = await supabaseClient.from("contacts").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
+  if (error) { console.log(error); tbody.innerHTML = `<tr><td colspan="5" class="text-muted text-center py-3">Failed to load contacts.</td></tr>`; return; }
 
   if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-muted text-center py-3">No contacts yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="text-muted text-center py-3">No contacts yet.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = "";
   data.forEach(c => {
-    tbody.innerHTML += `<tr><td>${c.full_name}</td><td>${c.phone || ""}</td><td>${c.email || ""}</td><td>${c.company || ""}</td></tr>`;
+    const canDelete = userRole === "admin" || userRole === "manager" || c.owner_id === currentUserId;
+    tbody.innerHTML += `<tr>
+      <td>${c.full_name}</td><td>${c.phone || ""}</td><td>${c.email || ""}</td><td>${c.company || ""}</td>
+      <td>${canDelete ? `<button class="btn btn-sm btn-outline-danger delete-contact-btn" data-contact-id="${c.id}">Delete</button>` : ""}</td>
+    </tr>`;
   });
 }
+
+document.addEventListener("click", async (e) => {
+  if (!e.target.classList.contains("delete-contact-btn")) return;
+  if (!confirm("Delete this contact?")) return;
+  const { data, error } = await supabaseClient
+    .from("contacts")
+    .update({ is_deleted: true })
+    .eq("id", e.target.getAttribute("data-contact-id"))
+    .select();
+  if (error) { console.log(error); alert("Failed to delete contact."); return; }
+  if (!data || data.length === 0) { alert("You don't have permission to delete this contact."); return; }
+  loadContacts();
+});
 
 document.getElementById("addContactForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -52,4 +71,10 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   window.location.href = "index.html";
 });
 
-loadContacts();
+async function initContactsPage() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  currentUserId = user?.id || null;
+  loadContacts();
+}
+
+initContactsPage();

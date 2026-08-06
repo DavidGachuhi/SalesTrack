@@ -14,7 +14,7 @@ Chart.defaults.borderColor = "#2e2e2e";
 const stages = ["New Lead", "Contacted", "Qualified", "Proposal Sent", "Negotiation", "Closed Won", "Closed Lost"];
 
 async function loadReports() {
-  const { data: leads, error: leadsError } = await supabaseClient.from("leads").select("*");
+  const { data: leads, error: leadsError } = await supabaseClient.from("leads").select("*").eq("is_deleted", false);
   const { data: activities, error: actError } = await supabaseClient.from("activities").select("*, users!activities_agent_id_fkey(full_name)");
   const { data: scorecards, error: scError } = await supabaseClient.from("scorecards").select("*");
 

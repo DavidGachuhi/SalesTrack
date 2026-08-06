@@ -22,7 +22,10 @@
   </nav>
 
   <div class="container mt-4">
-    <h1 class="h3 mb-4">Administration</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h3 mb-0">Administration</h1>
+      <button id="generateReportBtn" class="btn btn-outline-light btn-sm">Generate report</button>
+    </div>
 
     <div class="row g-4">
       <div class="col-md-7">
@@ -40,9 +43,46 @@
         <div id="auditLogList" class="d-flex flex-column gap-2"></div>
       </div>
     </div>
+
+    <div class="row mt-4">
+      <div class="col-md-5">
+        <h5>Create user</h5>
+        <form id="createUserForm">
+          <input type="text" class="form-control mb-2" id="newUserName" placeholder="Full name" required>
+          <input type="email" class="form-control mb-2" id="newUserEmail" placeholder="Email" required>
+          <input type="password" class="form-control mb-2" id="newUserPassword" placeholder="Temporary password" required minlength="6">
+          <select class="form-select mb-2" id="newUserRole" required>
+            <option value="agent">Agent</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button type="submit" class="btn btn-accent">Create user</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-md-8">
+        <h5>System lookups</h5>
+        <form id="addLookupForm" class="d-flex gap-2 mb-3" style="max-width:500px;">
+          <select class="form-select form-select-sm" id="lookupCategory" style="max-width:160px;">
+            <option value="activity_type">Activity type</option>
+          </select>
+          <input type="text" class="form-control form-control-sm" id="lookupValue" placeholder="Value (e.g. WhatsApp)" required>
+          <button type="submit" class="btn btn-accent btn-sm">Add</button>
+        </form>
+        <div class="table-responsive">
+          <table class="table table-dark table-hover">
+            <thead><tr><th>Category</th><th>Value</th><th></th></tr></thead>
+            <tbody id="lookupsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/admin.js"></script>
 </body>

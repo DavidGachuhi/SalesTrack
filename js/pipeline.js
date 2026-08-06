@@ -10,12 +10,15 @@ if (userRole === "admin") {
 
 const stages = ["New Lead", "Contacted", "Qualified", "Proposal Sent", "Negotiation", "Closed Won", "Closed Lost"];
 
+let currentUserId = null;
+let agentsForReassign = null;
+
 async function loadPipeline() {
   document.querySelectorAll(".kanban-cards").forEach(col => {
     col.innerHTML = `<div class="text-muted small">Loading...</div>`;
   });
 
-  const { data, error } = await supabaseClient.from("leads").select("*").order("created_at");
+  const { data, error } = await supabaseClient.from("leads").select("*").eq("is_deleted", false).order("created_at");
   if (error) { console.log(error); return; }
 
   document.querySelectorAll(".kanban-cards").forEach(col => col.innerHTML = "");
@@ -81,16 +84,26 @@ function calculateLeadMeta(lead) {
   return { score, overdue };
 }
 
+async function loadAgentsForReassign() {
+  if (agentsForReassign) return agentsForReassign;
+  const { data, error } = await supabaseClient.from("users").select("id, full_name").eq("role", "agent").order("full_name");
+  if (error) { console.log(error); agentsForReassign = []; return agentsForReassign; }
+  agentsForReassign = data;
+  return agentsForReassign;
+}
+
 async function openLeadDetail(leadId) {
   const { data: lead, error } = await supabaseClient
     .from("leads")
     .select("*, contacts(full_name, phone, email, company)")
+    .eq("is_deleted", false)
     .eq("id", leadId)
     .single();
 
   if (error) { console.log(error); alert("Failed to load lead."); return; }
 
   const { score, overdue } = calculateLeadMeta(lead);
+  const isManagerOrAdmin = userRole === "manager" || userRole === "admin";
 
   document.getElementById("leadDetailTitle").textContent = lead.title;
   document.getElementById("leadDetailStageBadge").textContent = lead.stage;
@@ -112,6 +125,21 @@ async function openLeadDetail(leadId) {
   } else {
     reasonWrap.classList.add("d-none");
   }
+
+  const reassignWrap = document.getElementById("leadDetailReassignWrap");
+  reassignWrap.classList.toggle("d-none", !isManagerOrAdmin);
+  if (isManagerOrAdmin) {
+    const agents = await loadAgentsForReassign();
+    const ownerSelect = document.getElementById("leadDetailOwnerSelect");
+    ownerSelect.innerHTML = agents.map(a => `<option value="${a.id}">${a.full_name}</option>`).join("");
+    ownerSelect.value = lead.owner_id;
+    document.getElementById("leadDetailReassignBtn").setAttribute("data-lead-id", lead.id);
+  }
+
+  const deleteBtn = document.getElementById("leadDetailDeleteBtn");
+  const canDelete = isManagerOrAdmin || lead.owner_id === currentUserId;
+  deleteBtn.classList.toggle("d-none", !canDelete);
+  deleteBtn.setAttribute("data-lead-id", lead.id);
 
   const logBtn = document.getElementById("leadDetailLogActivityBtn");
   logBtn.setAttribute("data-lead-id", lead.id);
@@ -188,12 +216,33 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   window.location.href = "index.html";
 });
 
-document.addEventListener("click", (e) => {
+document.addEventListener("click", async (e) => {
   const logBtn = e.target.closest(".log-activity-btn");
   if (logBtn) {
     document.getElementById("activityLeadId").value = logBtn.getAttribute("data-lead-id");
     document.getElementById("activityModalLeadTitle").textContent = "Log activity - " + logBtn.getAttribute("data-lead-title");
     new bootstrap.Modal(document.getElementById("logActivityModal")).show();
+    return;
+  }
+
+  if (e.target.id === "leadDetailReassignBtn") {
+    const leadId = e.target.getAttribute("data-lead-id");
+    const newOwnerId = document.getElementById("leadDetailOwnerSelect").value;
+    const { error } = await supabaseClient.from("leads").update({ owner_id: newOwnerId }).eq("id", leadId);
+    if (error) { console.log(error); alert("Failed to reassign lead."); return; }
+    await loadPipeline();
+    openLeadDetail(leadId);
+    return;
+  }
+
+  if (e.target.id === "leadDetailDeleteBtn") {
+    const leadId = e.target.getAttribute("data-lead-id");
+    if (!confirm("Delete this lead?")) return;
+    const { data, error } = await supabaseClient.from("leads").update({ is_deleted: true }).eq("id", leadId).select();
+    if (error) { console.log(error); alert("Failed to delete lead."); return; }
+    if (!data || data.length === 0) { alert("You don't have permission to delete this lead."); return; }
+    bootstrap.Modal.getInstance(document.getElementById("leadDetailModal")).hide();
+    loadPipeline();
     return;
   }
 
@@ -222,8 +271,23 @@ document.getElementById("logActivityForm").addEventListener("submit", async (e) 
   alert("Activity logged.");
 });
 
+async function loadActivityTypeOptions() {
+  const { data, error } = await supabaseClient
+    .from("system_lookups")
+    .select("value")
+    .eq("category", "activity_type")
+    .order("value");
+
+  const select = document.getElementById("activityType");
+  if (error || !data || data.length === 0) {
+    ["Call", "Email", "Meeting", "Note"].forEach(v => select.innerHTML += `<option value="${v}">${v}</option>`);
+    return;
+  }
+  data.forEach(l => select.innerHTML += `<option value="${l.value}">${l.value}</option>`);
+}
+
 async function loadContactsDropdown() {
-  const { data, error } = await supabaseClient.from("contacts").select("id, full_name");
+  const { data, error } = await supabaseClient.from("contacts").select("id, full_name").eq("is_deleted", false);
   if (error) { console.log(error); return; }
 
   const select = document.getElementById("leadContact");
@@ -251,6 +315,12 @@ document.getElementById("addLeadForm").addEventListener("submit", async (e) => {
   loadPipeline();
 });
 
-loadContactsDropdown();
+async function initPipelinePage() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  currentUserId = user?.id || null;
+  loadContactsDropdown();
+  loadActivityTypeOptions();
+  loadPipeline();
+}
 
-loadPipeline();
+initPipelinePage();
