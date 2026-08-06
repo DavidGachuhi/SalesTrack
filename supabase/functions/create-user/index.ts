@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-  const SERVICE_ROLE_KEY = Deno.env.get("SERVICE_ROLE_KEY");
+  const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   // Client scoped to the caller's own JWT, just to resolve who is calling
   const callerClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY"), {

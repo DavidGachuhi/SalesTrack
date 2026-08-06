@@ -11,7 +11,6 @@ if (userRole === "admin") {
 const stages = ["New Lead", "Contacted", "Qualified", "Proposal Sent", "Negotiation", "Closed Won", "Closed Lost"];
 
 let currentUserId = null;
-let agentsForReassign = null;
 
 async function loadPipeline() {
   document.querySelectorAll(".kanban-cards").forEach(col => {
@@ -85,17 +84,15 @@ function calculateLeadMeta(lead) {
 }
 
 async function loadAgentsForReassign() {
-  if (agentsForReassign) return agentsForReassign;
   const { data, error } = await supabaseClient.from("users").select("id, full_name").eq("role", "agent").order("full_name");
-  if (error) { console.log(error); agentsForReassign = []; return agentsForReassign; }
-  agentsForReassign = data;
-  return agentsForReassign;
+  if (error) { console.log(error); return []; }
+  return data;
 }
 
 async function openLeadDetail(leadId) {
   const { data: lead, error } = await supabaseClient
     .from("leads")
-    .select("*, contacts(full_name, phone, email, company)")
+    .select("*, contacts(full_name, phone, email, company, is_deleted)")
     .eq("is_deleted", false)
     .eq("id", leadId)
     .single();
@@ -111,7 +108,7 @@ async function openLeadDetail(leadId) {
   document.getElementById("leadDetailScore").textContent = score + " pts";
 
   const contactEl = document.getElementById("leadDetailContact");
-  if (lead.contacts) {
+  if (lead.contacts && !lead.contacts.is_deleted) {
     contactEl.innerHTML = `${lead.contacts.full_name}<br><span class="text-muted small">${lead.contacts.phone || ""} ${lead.contacts.email || ""}</span>`;
   } else {
     contactEl.textContent = "No contact linked";
@@ -132,6 +129,9 @@ async function openLeadDetail(leadId) {
     const agents = await loadAgentsForReassign();
     const ownerSelect = document.getElementById("leadDetailOwnerSelect");
     ownerSelect.innerHTML = agents.map(a => `<option value="${a.id}">${a.full_name}</option>`).join("");
+    if (!agents.some(a => a.id === lead.owner_id)) {
+      ownerSelect.innerHTML = `<option value="${lead.owner_id}">Current owner (not an agent)</option>` + ownerSelect.innerHTML;
+    }
     ownerSelect.value = lead.owner_id;
     document.getElementById("leadDetailReassignBtn").setAttribute("data-lead-id", lead.id);
   }
@@ -228,8 +228,9 @@ document.addEventListener("click", async (e) => {
   if (e.target.id === "leadDetailReassignBtn") {
     const leadId = e.target.getAttribute("data-lead-id");
     const newOwnerId = document.getElementById("leadDetailOwnerSelect").value;
-    const { error } = await supabaseClient.from("leads").update({ owner_id: newOwnerId }).eq("id", leadId);
+    const { data, error } = await supabaseClient.from("leads").update({ owner_id: newOwnerId }).eq("id", leadId).select();
     if (error) { console.log(error); alert("Failed to reassign lead."); return; }
+    if (!data || data.length === 0) { alert("You don't have permission to reassign this lead."); return; }
     await loadPipeline();
     openLeadDetail(leadId);
     return;

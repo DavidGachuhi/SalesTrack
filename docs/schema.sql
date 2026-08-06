@@ -18,6 +18,7 @@ CREATE TABLE public.contacts (
   company text,
   owner_id uuid,
   created_at timestamp without time zone DEFAULT now(),
+  is_deleted boolean DEFAULT false,
   CONSTRAINT contacts_pkey PRIMARY KEY (id),
   CONSTRAINT contacts_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id)
 );
@@ -30,6 +31,7 @@ CREATE TABLE public.leads (
   closed_reason text,
   last_contacted_at timestamp without time zone,
   created_at timestamp without time zone DEFAULT now(),
+  is_deleted boolean DEFAULT false,
   CONSTRAINT leads_pkey PRIMARY KEY (id),
   CONSTRAINT leads_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES public.contacts(id),
   CONSTRAINT leads_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id)
@@ -38,7 +40,7 @@ CREATE TABLE public.activities (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   lead_id uuid,
   agent_id uuid,
-  activity_type text NOT NULL CHECK (activity_type = ANY (ARRAY['Call'::text, 'Email'::text, 'Meeting'::text, 'Note'::text])),
+  activity_type text NOT NULL,
   notes text,
   created_at timestamp without time zone DEFAULT now(),
   CONSTRAINT activities_pkey PRIMARY KEY (id),
@@ -58,4 +60,19 @@ CREATE TABLE public.scorecards (
   CONSTRAINT scorecards_pkey PRIMARY KEY (id),
   CONSTRAINT scorecards_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES public.users(id),
   CONSTRAINT scorecards_manager_id_fkey FOREIGN KEY (manager_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.audit_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  actor_id uuid,
+  details text NOT NULL,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT audit_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT audit_logs_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.system_lookups (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  category text NOT NULL,
+  value text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT system_lookups_pkey PRIMARY KEY (id)
 );

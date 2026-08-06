@@ -103,13 +103,15 @@ async function loadLookups() {
   const tbody = document.getElementById("lookupsTableBody");
   tbody.innerHTML = `<tr><td colspan="3" class="text-muted text-center py-3">Loading...</td></tr>`;
 
-  const { data, error } = await supabaseClient.from("system_lookups").select("*").order("category").order("value");
+  const { data, error } = await supabaseClient.from("system_lookups").select("*");
   if (error) { console.log(error); tbody.innerHTML = `<tr><td colspan="3" class="text-muted text-center py-3">Failed to load lookups.</td></tr>`; return; }
 
   if (data.length === 0) {
     tbody.innerHTML = `<tr><td colspan="3" class="text-muted text-center py-3">No lookup values yet.</td></tr>`;
     return;
   }
+
+  data.sort((a, b) => a.category.localeCompare(b.category) || a.value.localeCompare(b.value));
 
   tbody.innerHTML = "";
   data.forEach(l => {
