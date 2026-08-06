@@ -2,9 +2,9 @@ const userRole = localStorage.getItem("userRole");
 if (!userRole) window.location.href = "index.html";
 
 if (userRole === "admin") {
-  document.querySelector("nav .d-flex").insertAdjacentHTML(
-    "beforeend",
-    '<a href="admin.html" class="navlink">Admin</a>'
+  document.getElementById("logoutBtn").insertAdjacentHTML(
+    "beforebegin",
+    '<a href="admin.html" class="btn btn-outline-light btn-sm navlink">Admin</a>'
   );
 }
 
@@ -147,7 +147,8 @@ async function openLeadDetail(leadId) {
 
   await loadLeadActivities(leadId);
 
-  new bootstrap.Modal(document.getElementById("leadDetailModal")).show();
+  const modalEl = document.getElementById("leadDetailModal");
+  (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)).show();
 }
 
 async function loadLeadActivities(leadId) {

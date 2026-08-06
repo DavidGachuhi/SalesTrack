@@ -7,9 +7,9 @@ if (!userRole) {
 }
 
 if (userRole === "admin") {
-  document.querySelector("nav .d-flex").insertAdjacentHTML(
-    "beforeend",
-    '<a href="admin.html" class="navlink">Admin</a>'
+  document.getElementById("logoutBtn").insertAdjacentHTML(
+    "beforebegin",
+    '<a href="admin.html" class="btn btn-outline-light btn-sm navlink">Admin</a>'
   );
 }
 

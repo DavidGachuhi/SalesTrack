@@ -74,8 +74,9 @@ document.addEventListener("change", async (e) => {
     const userId = e.target.getAttribute("data-user-id");
     const newRole = e.target.value;
 
-    const { error } = await supabaseClient.from("users").update({ role: newRole }).eq("id", userId);
+    const { data, error } = await supabaseClient.from("users").update({ role: newRole }).eq("id", userId).select();
     if (error) { console.log(error); alert("Failed to update role."); return; }
+    if (!data || data.length === 0) { alert("You don't have permission to change this user's role."); loadUsers(); return; }
     loadUsers();
   }
 });
@@ -85,8 +86,9 @@ document.addEventListener("click", async (e) => {
     const userId = e.target.getAttribute("data-user-id");
     const current = e.target.getAttribute("data-current") === "true";
 
-    const { error } = await supabaseClient.from("users").update({ is_active: !current }).eq("id", userId);
+    const { data, error } = await supabaseClient.from("users").update({ is_active: !current }).eq("id", userId).select();
     if (error) { console.log(error); alert("Failed to update status."); return; }
+    if (!data || data.length === 0) { alert("You don't have permission to change this user's status."); loadUsers(); return; }
     loadUsers();
     return;
   }
